@@ -40,6 +40,44 @@ return setmetatable(ci, {
       </Properties>
       <Item class="ModuleScript" referent="3">
         <Properties>
+          <string name="Name">LibCustomEvent</string>
+          <string name="Source">--[[
+File name: LibCustomEvent.lua
+Author: RadiatedExodus (RealEthanPlayz)
+--]]
+
+local LibCustomEvent = {}
+LibCustomEvent.__index = LibCustomEvent
+LibCustomEvent.__newindex = function() end
+LibCustomEvent.__metatable = "The metatable is locked"
+
+function LibCustomEvent.new()
+    local self = setmetatable({}, LibCustomEvent)
+
+    self.events = {}
+    self.isDestroyed = false
+
+    return self
+end
+
+function LibCustomEvent:Fire(...)
+    for _, v in ipairs(self.events) do
+        v(...)
+    end
+    return
+end
+
+function LibCustomEvent:Connect(func)
+    assert(typeof(func) == "function", [[LibCustomEvent: invalid argument #1 to 'Connect' (function expected, got ]]..typeof(func)..[[)]])
+    table.insert(self.events, #self.events + 1, func)
+    return
+end
+
+return LibCustomEvent</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="4">
+        <Properties>
           <string name="Name">LibInstUtil</string>
           <string name="Source">--[[
 File name: LibInstUtil.lua
@@ -102,12 +140,12 @@ return LibInstUtil</string>
       </Item>
     </Item>
   </Item>
-  <Item class="Workspace" referent="4">
+  <Item class="Workspace" referent="5">
     <Properties>
       <string name="Name">Workspace</string>
       <bool name="FilteringEnabled">true</bool>
     </Properties>
-    <Item class="Part" referent="5">
+    <Item class="Part" referent="6">
       <Properties>
         <string name="Name">Baseplate</string>
         <bool name="Anchored">true</bool>
