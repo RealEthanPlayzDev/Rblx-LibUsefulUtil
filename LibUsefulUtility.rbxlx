@@ -1,0 +1,101 @@
+<roblox version="4">
+  <Item class="Lighting" referent="0">
+    <Properties>
+      <string name="Name">Lighting</string>
+      <Color3 name="Ambient">
+        <R>0</R>
+        <G>0</G>
+        <B>0</B>
+      </Color3>
+      <float name="Brightness">2</float>
+      <bool name="GlobalShadows">true</bool>
+      <bool name="Outlines">false</bool>
+      <token name="Technology">1</token>
+    </Properties>
+  </Item>
+  <Item class="ServerScriptService" referent="1">
+    <Properties>
+      <string name="Name">ServerScriptService</string>
+    </Properties>
+    <Item class="ModuleScript" referent="2">
+      <Properties>
+        <string name="Name">LibUsefulUtility</string>
+        <string name="Source">--[[
+File name: LibUsefulUtility.lua
+Author: RadiatedExodus (RealEthanPlayz)
+--]]
+
+local ci = script:GetChildren()
+return setmetatable(ci, {
+	__newindex = function() end,
+	__call = function(utilname)
+		local indexed = ci[table.find(ci, utilname or nil)]
+		if indexed then
+			return require(indexed)
+		end
+		return false
+	end,
+	__metatable = "Locked"
+})</string>
+      </Properties>
+      <Item class="ModuleScript" referent="3">
+        <Properties>
+          <string name="Name">LibInstUtil</string>
+          <string name="Source">--[[
+File name: LibInstUtil.lua
+Author: RadiatedExodus (RealEthanPlayz)
+--]]
+
+local LibInstUtil = {}
+
+--// function &lt;number> LibInstUtil.CalculateTotalMass(inst: Instance)
+function LibInstUtil.CalculateTotalMass(inst)
+    assert(typeof(inst) == "Instance", "LibInstUtil.CalculateTotalMass: expected value type Instance, given value type "..typeof(inst))
+    if inst:IsA("BasePart") then
+        return inst.Mass
+    elseif inst:IsA("Model") then
+        local masscount = 0
+        for _, v in pairs(inst:GetDescendants()) do
+            if v:IsA("BasePart") then
+                masscount += v.Mass
+            end
+        end
+    end
+end
+
+return LibInstUtil</string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="SoundService" referent="4">
+    <Properties>
+      <string name="Name">SoundService</string>
+      <bool name="RespectFilteringEnabled">true</bool>
+    </Properties>
+  </Item>
+  <Item class="Workspace" referent="5">
+    <Properties>
+      <string name="Name">Workspace</string>
+      <bool name="FilteringEnabled">true</bool>
+    </Properties>
+    <Item class="Part" referent="6">
+      <Properties>
+        <string name="Name">Baseplate</string>
+        <bool name="Anchored">true</bool>
+        <Color3uint8 name="Color3uint8">6446690</Color3uint8>
+        <bool name="Locked">true</bool>
+        <Vector3 name="Position">
+          <X>0</X>
+          <Y>-10</Y>
+          <Z>0</Z>
+        </Vector3>
+        <Vector3 name="size">
+          <X>512</X>
+          <Y>20</Y>
+          <Z>512</Z>
+        </Vector3>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>

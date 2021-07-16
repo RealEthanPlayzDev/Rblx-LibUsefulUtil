@@ -1,10 +1,10 @@
 {
-  "name": "LibUsefulUtil",
+  "name": "LibUsefulUtil q",
   "tree": {
     "$className": "DataModel",
 	
     "ServerScriptService": {
-      "Server": {
+      "LibUsefulUtility": {
         "$path": "LibUsefulUtility"
       }
     },
