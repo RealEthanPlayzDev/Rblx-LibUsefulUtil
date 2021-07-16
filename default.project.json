@@ -4,12 +4,14 @@
     "$className": "DataModel",
 	
     "ServerScriptService": {
+      "$className": "ServerScriptService",
       "LibUsefulUtility": {
         "$path": "LibUsefulUtility"
       }
     },
 
     "Workspace": {
+      "$className": "Workspace",
       "$properties": {
         "FilteringEnabled": true
       },
@@ -37,6 +39,7 @@
       }
     },
     "Lighting": {
+      "$className": "Lighting",
       "$properties": {
         "Ambient": [
           0,
@@ -47,11 +50,6 @@
         "GlobalShadows": true,
         "Outlines": false,
         "Technology": "Voxel"
-      }
-    },
-    "SoundService": {
-      "$properties": {
-        "RespectFilteringEnabled": true
       }
     }
   }
