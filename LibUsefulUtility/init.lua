@@ -10,9 +10,8 @@ end
 return setmetatable(ct, {
 	__newindex = function() end,
 	__call = function(t, utilname)
-		local indexed = t[table.find(t, utilname or nil)]
-		if indexed then
-			return require(indexed)
+		if t[utilname] then
+			return require(t[utilname])
 		end
 		return false
 	end,
