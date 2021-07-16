@@ -25,17 +25,19 @@ File name: LibUsefulUtility.lua
 Author: RadiatedExodus (RealEthanPlayz)
 --]]
 
-local ci = script:GetChildren()
-return setmetatable(ci, {
+local ct = {}
+for _, v in ipairs(script:GetChildren()) do
+	ct[v.Name] = v
+end
+return setmetatable(ct, {
 	__newindex = function() end,
-	__call = function(utilname)
-		local indexed = ci[table.find(ci, utilname or nil)]
-		if indexed then
-			return require(indexed)
+	__call = function(t, utilname)
+		if t[utilname] then
+			return require(t[utilname])
 		end
 		return false
 	end,
-	__metatable = "Locked"
+	__metatable = "This metatable is locked"
 })</string>
       </Properties>
       <Item class="ModuleScript" referent="3">
@@ -48,32 +50,41 @@ Author: RadiatedExodus (RealEthanPlayz)
 
 local LibCustomEvent = {}
 LibCustomEvent.__index = LibCustomEvent
-LibCustomEvent.__newindex = function() end
+--// LibCustomEvent.__newindex = function() end
 LibCustomEvent.__metatable = "The metatable is locked"
 
-function LibCustomEvent.new()
-    local self = setmetatable({}, LibCustomEvent)
-
-    self.events = {}
-    self.isDestroyed = false
-
-    return self
-end
-
 function LibCustomEvent:Fire(...)
+    assert(not self.isDestroyed, [[LibCustomEvent: this event has been destroyed and no longer can be used]])
     for _, v in ipairs(self.events) do
+        if not typeof(v) == "function" then continue end
         v(...)
     end
     return
 end
 
 function LibCustomEvent:Connect(func)
+    assert(not self.isDestroyed, [[LibCustomEvent: this event has been destroyed and no longer can be used]])
     assert(typeof(func) == "function", [[LibCustomEvent: invalid argument #1 to 'Connect' (function expected, got ]]..typeof(func)..[[)]])
     table.insert(self.events, #self.events + 1, func)
     return
 end
 
-return LibCustomEvent</string>
+function LibCustomEvent:Destroy()
+    self.isDestroyed = true
+    table.clear(self.events)
+    return
+end
+
+return {
+	new = function()
+		local newevent = setmetatable({}, LibCustomEvent)
+
+		newevent.events = {}
+		newevent.isDestroyed = false
+
+		return newevent
+	end
+}</string>
         </Properties>
       </Item>
       <Item class="ModuleScript" referent="4">
