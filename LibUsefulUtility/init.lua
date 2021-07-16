@@ -3,15 +3,18 @@ File name: LibUsefulUtility.lua
 Author: RadiatedExodus (RealEthanPlayz)
 --]]
 
-local ci = script:GetChildren()
-return setmetatable(ci, {
+local ct = {}
+for _, v in ipairs(script:GetChildren()) do
+	ct[v.Name] = v
+end
+return setmetatable(ct, {
 	__newindex = function() end,
-	__call = function(utilname)
-		local indexed = ci[table.find(ci, utilname or nil)]
+	__call = function(t, utilname)
+		local indexed = t[table.find(t, utilname or nil)]
 		if indexed then
 			return require(indexed)
 		end
 		return false
 	end,
-	__metatable = "Locked"
+	__metatable = "This metatable is locked"
 })
