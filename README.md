@@ -1,2 +1,2 @@
-# LibInstUtil
+# LibUsefulUtil
 TODO: Make proper readme
