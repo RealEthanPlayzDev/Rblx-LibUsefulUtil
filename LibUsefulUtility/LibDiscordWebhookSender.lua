@@ -9,7 +9,7 @@ local serv = {
 
 local LibDiscordWebhookSender = {}
 LibDiscordWebhookSender.__index = LibDiscordWebhookSender
-LibDiscordWebhookSender.__metatable = "This metatable is locked"
+LibDiscordWebhookSender.__metatable = "The metatable is locked"
 LibDiscordWebhookSender.ClassName = "LibDiscordWebhookSender"
 
 local function CheckHttpEnabled()
