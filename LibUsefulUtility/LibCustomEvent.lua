@@ -25,6 +25,21 @@ function LibCustomEvent:Fire(...)
     return
 end
 
+--// function <void> LibCustomEvent:FireSync(... : variant)
+function LibCustomEvent:FireSync(...)
+    assert(not self.isDestroyed, [[LibCustomEvent: this event has been destroyed and no longer can be used]])
+    for _, v in ipairs(self.events) do
+        if not typeof(v) == "function" then continue end
+        v(...)
+    end
+    return
+end
+
+--// [alias of: LibCustomEvent:Fire(...)] function <void> LibCustomEvent:FireAsync(... : variant)
+function LibCustomEvent:FireAsync(...)
+    return LibCustomEvent:Fire(...)
+end
+
 --// function <LibCustomEventConnected> LibCustomEvent:Connect(func: function)
 function LibCustomEvent:Connect(func)
     assert(not self.isDestroyed, [[LibCustomEvent: this event has been destroyed and no longer can be used]])
