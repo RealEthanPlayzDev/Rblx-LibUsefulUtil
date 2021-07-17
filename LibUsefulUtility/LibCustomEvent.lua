@@ -17,7 +17,10 @@ function LibCustomEvent:Fire(...)
     assert(not self.isDestroyed, [[LibCustomEvent: this event has been destroyed and no longer can be used]])
     for _, v in ipairs(self.events) do
         if not typeof(v) == "function" then continue end
-        v(...)
+        local temp = {...}
+        spawn(function() 
+            v(unpack(temp))
+        end)
     end
     return
 end
