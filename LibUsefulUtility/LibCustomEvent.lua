@@ -1,6 +1,6 @@
 --[[
 File name: LibCustomEvent.lua
-Author: RadiatedExodus (RealEthanPlayz)
+Author: RadiatedExodus (RealEthanPlayz/RealEthanPlayzDev/ItzEthanPlayz_YT)
 --]]
 
 local LibCustomEvent = {}
