@@ -6,7 +6,7 @@ Author: RadiatedExodus (RealEthanPlayz/RealEthanPlayzDev/ItzEthanPlayz_YT)
 local LibInstUtil = {}
 
 --// function <number> LibInstUtil.CalculateTotalMass(inst: Instance)
-function LibInstUtil.CalculateTotalMass(inst: Instance)
+function LibInstUtil.CalculateTotalMass(inst: Instance): number
     assert(typeof(inst) == "Instance", [[LibInstUtil: invalid argument #2 to 'Create' (Instance expected, got ]]..typeof(inst)..[[)]])
     if inst:IsA("BasePart") then
         return inst.Mass
@@ -17,11 +17,12 @@ function LibInstUtil.CalculateTotalMass(inst: Instance)
                 masscount += v.Mass
             end
         end
+        return masscount
     end
 end
 
 --// function <Instance> LibInstUtil.Create(classname: string, data: table)
-function LibInstUtil.Create(classname: string, data: table)
+function LibInstUtil.Create(classname: string, data: table): Instance
     assert(typeof(classname) == "string", [[LibInstUtil: invalid argument #1 to 'Create' (string expected, got ]]..typeof(classname)..[[)]])
     assert(typeof(data) == "table", [[LibInstUtil: invalid argument #2 to 'Create' (table expected, got ]]..typeof(classname)..[[)]])
     local newinst = Instance.new(classname)
