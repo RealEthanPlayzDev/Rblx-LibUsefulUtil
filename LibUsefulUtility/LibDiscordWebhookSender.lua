@@ -61,6 +61,17 @@ function LibDiscordWebhookSender:SetContent(newcontent: string)
     return self
 end
 
+--// function <LibDiscordWebhookSender> LibDiscordWebhookSender:AddEmbed(newembed: table)
+function LibDiscordWebhookSender:AddEmbed(newembed: table)
+    assert(typeof(newembed) == "table", [[LibDiscordWebhookSender: invalid argument #1 to 'AddEmbed' (table expected, got ]]..typeof(newembed)..[[)]])
+    if newembed["ClassName"] == "LibDiscordEmbedCreator" then
+        table.insert(self.webhookluatabledata.embeds, #self.webhookluatabledata.embeds + 1, newembed.embedtable)
+    else
+        table.insert(self.webhookluatabledata.embeds, #self.webhookluatabledata.embeds + 1, newembed)
+    end
+    return self
+end
+
 return {
     --// [constructor] function <LibDiscordWebhookSender> new(webhookurl: string)
     new = function(webhookurl: string)
