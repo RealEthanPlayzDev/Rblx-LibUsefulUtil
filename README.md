@@ -26,3 +26,6 @@ There are some that are compatible in both server and client, and some only on t
 
 # License
 LibUsefulUtility (Rblx-LibUsefulUtility) is licensed under [GNU General Public License v3.0](/LICENSE)
+
+# Contributing
+See the [contribution guide](/CONTRIBUTING.MD) for more information.
