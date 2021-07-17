@@ -117,14 +117,101 @@ return {
       </Item>
       <Item class="ModuleScript" referent="4">
         <Properties>
+          <string name="Name">LibDiscordEmbedCreator</string>
+          <string name="Source"><![CDATA[--[[
+File name: LibDiscordEmbedCreator.lua
+Author: RadiatedExodus (RealEthanPlayz/RealEthanPlayzDev/ItzEthanPlayz_YT)
+--]]
+
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="5">
+        <Properties>
           <string name="Name">LibDiscordWebhookSender</string>
           <string name="Source">--[[
 File name: LibDiscordWebhookSender.lua
 Author: RadiatedExodus (RealEthanPlayz/RealEthanPlayzDev/ItzEthanPlayz_YT)
---]]</string>
+--]]
+
+local serv = {
+    HttpService = game:GetService("HttpService");
+}
+
+local LibDiscordWebhookSender = {}
+LibDiscordWebhookSender.__index = LibDiscordWebhookSender
+LibDiscordWebhookSender.__metatable = "This metatable is locked"
+LibDiscordWebhookSender.ClassName = "LibDiscordWebhookSender"
+
+local function CheckHttpEnabled()
+    return pcall(function()
+        serv.HttpService:GetAsync("https://www.google.com")
+        return true
+    end)
+end
+
+--// function &lt;boolean> LibDiscordWebhookSender:SendData()
+function LibDiscordWebhookSender:SendData()
+    --// https://developer.roblox.com/en-us/api-reference/function/HttpService/RequestAsync
+    assert(CheckHttpEnabled(), "LibDiscordWebhookSender: Http requests are not enabled. Enable via game settings")
+    local sendsuccess, sendattempt, sendresult = false, 0, nil
+    sendsuccess, sendresult = pcall(function()
+        return serv.HttpService:RequestAsync({
+            Url = tostring(self.webhookurl);
+            Method = "POST";
+            Headers = { ["Content-Type"] = "application/json" };
+            Body = serv.HttpService:JSONEncode(self.webhookluatabledata)
+        })
+    end)
+
+    if sendsuccess and sendresult.Success == true then
+        return true
+    else
+        return error("LibDiscordWebhookSender: unable to send webhook data\nStatusCode: "..sendresult.StatusCode.."\nStatusMessage: "..sendresult.StatusMessage, 2)
+    end
+end
+
+--// function &lt;LibDiscordWebhookSender> LibDiscordWebhookSender:SetUsername(newname: string)
+function LibDiscordWebhookSender:SetUsername(newname: string)
+    assert(typeof(newname) == "string", [[LibDiscordWebhookSender: invalid argument #1 to 'SetUsername' (string expected, got ]]..typeof(newname)..[[)]])
+    self.webhookluatabledata.username = tostring(newname)
+    return self
+end
+
+--// function &lt;LibDiscordWebhookSender> LibDiscordWebhookSender:SetAvatarUrl(newavatarurl: string)
+function LibDiscordWebhookSender:SetAvatarUrl(newavatarurl: string)
+    assert(typeof(newavatarurl) == "string", [[LibDiscordWebhookSender: invalid argument #1 to 'SetAvatarUrl' (string expected, got ]]..typeof(newavatarurl)..[[)]])
+    self.webhookluatabledata.avatar_url = tostring(newavatarurl)
+    return self
+end
+
+--// function &lt;LibDiscordWebhookSender> LibDiscordWebhookSender:SetAvatarUrl(newavatarurl: string)
+function LibDiscordWebhookSender:SetContent(newcontent: string)
+    assert(typeof(newcontent) == "string", [[LibDiscordWebhookSender: invalid argument #1 to 'SetContent' (string expected, got ]]..typeof(newcontent)..[[)]])
+    self.webhookluatabledata.content = tostring(newcontent)
+    return self
+end
+
+return {
+    --// [constructor] function &lt;LibDiscordWebhookSender> new(webhookurl: string)
+    new = function(webhookurl: string)
+        assert(typeof(webhookurl) == "string", [[LibDiscordWebhookSender: invalid argument #1 to 'new' (string expected, got ]]..typeof(webhookurl)..[[)]])
+        local self = setmetatable({}, LibDiscordWebhookSender)
+
+        self.webhookurl = webhookurl
+        self.webhookluatabledata = {
+            username = ""; --// Webhook username
+            avatar_url = ""; --// Webhook avatar
+            content = ""; --// Webhook message (max 2000 characters as defined by Discord)
+            embeds = {}; --// Webhook embeds
+        }
+
+        return self
+    end
+}</string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="5">
+      <Item class="ModuleScript" referent="6">
         <Properties>
           <string name="Name">LibInstUtil</string>
           <string name="Source">--[[
@@ -135,7 +222,7 @@ Author: RadiatedExodus (RealEthanPlayz/RealEthanPlayzDev/ItzEthanPlayz_YT)
 local LibInstUtil = {}
 
 --// function &lt;number> LibInstUtil.CalculateTotalMass(inst: Instance)
-function LibInstUtil.CalculateTotalMass(inst: Instance)
+function LibInstUtil.CalculateTotalMass(inst: Instance): number
     assert(typeof(inst) == "Instance", [[LibInstUtil: invalid argument #2 to 'Create' (Instance expected, got ]]..typeof(inst)..[[)]])
     if inst:IsA("BasePart") then
         return inst.Mass
@@ -146,11 +233,12 @@ function LibInstUtil.CalculateTotalMass(inst: Instance)
                 masscount += v.Mass
             end
         end
+        return masscount
     end
 end
 
 --// function &lt;Instance> LibInstUtil.Create(classname: string, data: table)
-function LibInstUtil.Create(classname: string, data: table)
+function LibInstUtil.Create(classname: string, data: table): Instance
     assert(typeof(classname) == "string", [[LibInstUtil: invalid argument #1 to 'Create' (string expected, got ]]..typeof(classname)..[[)]])
     assert(typeof(data) == "table", [[LibInstUtil: invalid argument #2 to 'Create' (table expected, got ]]..typeof(classname)..[[)]])
     local newinst = Instance.new(classname)
@@ -188,12 +276,12 @@ return LibInstUtil</string>
       </Item>
     </Item>
   </Item>
-  <Item class="Workspace" referent="6">
+  <Item class="Workspace" referent="7">
     <Properties>
       <string name="Name">Workspace</string>
       <bool name="FilteringEnabled">true</bool>
     </Properties>
-    <Item class="Part" referent="7">
+    <Item class="Part" referent="8">
       <Properties>
         <string name="Name">Baseplate</string>
         <bool name="Anchored">true</bool>
