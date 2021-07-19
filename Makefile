@@ -1,3 +1,9 @@
+ifeq ($(OS),Windows_NT) 
+    runos = "Windows"
+else
+    runos = "Linux"
+endif
+
 outputfile = "LibUsefulUtility.rbxmx"
 outputplace = "LibUsefulUtility.rbxlx"
 rojoexecutable = "rojo"
@@ -14,5 +20,10 @@ place :
 	$(rojoexecutable) build $(rojoplaceproject) --output $(outputplace)
 
 clean :
-	if exist outputfile then ( rd /S /Q $(outputfile) )
-	if exist outputplace then ( rd /S /Q $(outputplace) )
+	ifeq (runos, Windows)
+		if exist $(outputfile) then ( rd /S /Q $(outputfile) )
+		if exist $(outputplace) then ( rd /S /Q $(outputplace) )
+	else
+		$(RM) $(outputfile)
+		$(RM) $(outputplace)
+	endif
