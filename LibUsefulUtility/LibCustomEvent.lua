@@ -1,88 +1,112 @@
 --[[
 File name: LibCustomEvent.lua
 Author: RadiatedExodus (RealEthanPlayz/RealEthanPlayzDev/ItzEthanPlayz_YT)
+Version: 2 (revision 1)
+NOTES:
+- v2 is more readable
 --]]
 
-local LibCustomEvent = {}
-local LibCustomEventConnected = {}
+--// Classes
+local LibCustomEventConstructor = {} --// Constructor class
+local LibCustomEvent = {} --// Base class
+local LibCustomEventConnection = {} --// Connection class
+
+--// Class setup
+LibCustomEventConstructor.ClassName = "LibCustomEventConstructor"
+LibCustomEvent.ClassName = "LibCustomEvent"
+LibCustomEventConnection.ClassName = "LibCustomEventConnection"
+--// __index
+LibCustomEventConstructor.__index = LibCustomEventConstructor
 LibCustomEvent.__index = LibCustomEvent
-LibCustomEventConnected.__index = LibCustomEventConnected
+LibCustomEventConnection.__index = LibCustomEventConnection
+--// __tostring
+function LibCustomEventConstructor:__tostring()
+    return self.ClassName
+end
+function LibCustomEvent:__tostring()
+    return self.ClassName
+end
+function LibCustomEventConnection:__tostring()
+    return self.ClassName
+end
+--// __newindex
+LibCustomEventConstructor.__newindex = function()
+    error("LibCustomEventConstructor: Attempt to modify a readonly table", 2)
+end
+LibCustomEvent.__newindex = function()
+    error("LibCustomEvent: Attempt to modify a readonly table", 2)
+end
+LibCustomEventConnection.__newindex = function()
+    error("LibCustomEventConnection: Attempt to modify a readonly table", 2)
+end
 
-LibCustomEvent.__metatable = "The metatable is locked"
-LibCustomEventConnected.__metatable = "The metatable is locked"
 
---// LibCustomEvent class
---// function <void> LibCustomEvent:Fire(... : variant)
+--// CLASS : LibCustomEventConstructor : CONSTRUCTOR \\--
+--// function <LibCustomEvent> LibCustomEventConstructor.new()
+function LibCustomEventConstructor.new()
+    return setmetatable({
+        __LCE_EVENTS = {};
+        __LCE_DESTROYED = false;
+    }, LibCustomEvent)
+end
+
+--// CLASS : LibCustomEvent : BASE CLASS \\
+--// function <LibCustomEventConnection> LibCustomEvent:Connect(func: function)
+function LibCustomEvent:Connect(func)
+    assert(typeof(func) == "function", [[LibCustomEvent: invalid argument #1 to 'Connect' (function expected, got ]]..typeof(func)..[[)]])
+    local index = #self.__LCE_EVENTS + 1
+    rawset(self.__LCE_EVENTS, index, func)
+    return setmetatable({
+        __LCEC_LCEINST = self;
+        __LCEC_LCEINDEX = index;
+    }, LibCustomEventConnection)
+end
+
+--// function <void> LibCustomEvent:Fire(...)
 function LibCustomEvent:Fire(...)
-    assert(not self.isDestroyed, [[LibCustomEvent: this event has been destroyed and no longer can be used]])
-    for _, v in ipairs(self.events) do
-        if not typeof(v) == "function" then continue end
-        local temp = {...}
-        spawn(function() 
-            v(unpack(temp))
+    for _, func in next, self.__LCE_EVENTS do
+        if typeof(func) ~= "function" then continue end
+        local ta = {...}
+        spawn(function()
+            func(unpack(ta))
         end)
     end
-    return
 end
 
---// function <void> LibCustomEvent:FireSync(... : variant)
+--// function <void> LibCustomEvent:Fire(...)
 function LibCustomEvent:FireSync(...)
-    assert(not self.isDestroyed, [[LibCustomEvent: this event has been destroyed and no longer can be used]])
-    for _, v in ipairs(self.events) do
-        if not typeof(v) == "function" then continue end
-        v(...)
+    for _, func in next, self.__LCE_EVENTS do
+        if typeof(func) ~= "function" then continue end
+        xpcall(func, function(err)
+            spawn(function()
+                error(err, 2)
+            end)
+        end, ...)
     end
     return
 end
 
---// [alias of: LibCustomEvent:Fire(...)] function <void> LibCustomEvent:FireAsync(... : variant)
+--// ALIAS OF LibCustomEvent:Fire(...) : function <void> LibCustomEvent:FireAsync(...)
 function LibCustomEvent:FireAsync(...)
-    return LibCustomEvent:Fire(...)
+    return self:Fire(...)
 end
 
---// function <LibCustomEventConnected> LibCustomEvent:Connect(func: function)
-function LibCustomEvent:Connect(func)
-    assert(not self.isDestroyed, [[LibCustomEvent: this event has been destroyed and no longer can be used]])
-    assert(typeof(func) == "function", [[LibCustomEvent: invalid argument #1 to 'Connect' (function expected, got ]]..typeof(func)..[[)]])
-    local selindex = #self.events + 1
-    table.insert(self.events, selindex, func)
-    return LibCustomEventConnected.new(self, selindex)
-end
+--// CLASS : LibCustomEventConnection : CONNECTION CLASS \\
+--// boolean LibCustomEventConnection.Connected
+LibCustomEventConnection.Connected = true
 
---// [deconstructor] function <void> LibCustomEvent:Destroy()
-function LibCustomEvent:Destroy()
-    self.isDestroyed = true
-    table.clear(self.events)
+--// function <void> LibCustomEventConnection:Disconnect()
+function LibCustomEventConnection:Disconnect()
+    --// Unregister
+    if self.Connected then
+        rawset(self.__LCEC_LCEINST.__LCE_EVENTS, self.__LCEC_LCEINDEX, nil)
+        rawset(self, "Connected", false)
+    end
+    --// Cleanup
+    rawset(self, "__LCEC_LCEINST", nil)
+    rawset(self, "__LCEC_LCEINDEX", nil)
     return
 end
 
---// LibCustomEventConnected class
---// [internal class usage]
-function LibCustomEventConnected.new(eventinst, index)
-    local newconnectedevent = setmetatable({}, LibCustomEventConnected)
-
-    newconnectedevent.eventinst = eventinst
-    newconnectedevent.currentindex = index
-    newconnectedevent.Connected = true
-
-    return newconnectedevent
-end
-
---// function <void> LibCustomEventConnected:Disconnect()
-function LibCustomEventConnected:Disconnect()
-    table.remove(self.eventinst.events, self.currentindex)
-    self.Connected = false
-    return
-end
-
-return {
-    --// constructor
-	new = function()
-		local newevent = setmetatable({}, LibCustomEvent)
-
-		newevent.events = {}
-		newevent.isDestroyed = false
-
-		return newevent
-	end
-}
+--// Return the constructor class
+return LibCustomEventConstructor
