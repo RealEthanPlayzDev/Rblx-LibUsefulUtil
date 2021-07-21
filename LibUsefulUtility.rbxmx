@@ -80,31 +80,35 @@ end
 --// CLASS : LibCustomEvent : BASE CLASS \\
 --// function &lt;LibCustomEventConnection> LibCustomEvent:Connect(func: function)
 function LibCustomEvent:Connect(func)
+    assert(not self.__LCE_DESTROYED, "LibCustomEvent: event is already destroyed")
     assert(typeof(func) == "function", [[LibCustomEvent: invalid argument #1 to 'Connect' (function expected, got ]]..typeof(func)..[[)]])
-    local index = #self.__LCEC_LCEINST.__LCE_EVENTS + 1
-    rawset(self.__LCE_EVENTS, index, func)
-    return setmetatable({
-        __LCEC_LCEINST = self;
-        __LCEC_LCEINDEX = index;
-    }, LibCustomEventConnection)
+    local index = #self.__LCE_EVENTS + 1
+        local LCEC = setmetatable({
+            __LCEC_LCEINST = self;
+            __LCEC_LCEINDEX = index;
+        }, LibCustomEventConnection)
+    rawset(self.__LCE_EVENTS, index, { func; LCEC; })
+    return
 end
 
 --// function &lt;void> LibCustomEvent:Fire(...)
 function LibCustomEvent:Fire(...)
-    for _, func in next, self.__LCE_EVENTS do
-        if typeof(func) ~= "function" then continue end
+    assert(not self.__LCE_DESTROYED, "LibCustomEvent: event is already destroyed")
+    for _, functable in next, self.__LCE_EVENTS do
+        if typeof(functable[1]) ~= "function" then continue end
         local ta = {...}
         spawn(function()
-            func(unpack(ta))
+            functable[1](unpack(ta))
         end)
     end
 end
 
 --// function &lt;void> LibCustomEvent:Fire(...)
 function LibCustomEvent:FireSync(...)
-    for _, func in next, self.__LCE_EVENTS do
-        if typeof(func) ~= "function" then continue end
-        xpcall(func, function(err)
+    assert(not self.__LCE_DESTROYED, "LibCustomEvent: event is already destroyed")
+    for _, functable in next, self.__LCE_EVENTS do
+        if typeof(functable[1]) ~= "function" then continue end
+        xpcall(functable[1], function(err)
             spawn(function()
                 error(err, 2)
             end)
@@ -116,6 +120,17 @@ end
 --// ALIAS OF LibCustomEvent:Fire(...) : function &lt;void> LibCustomEvent:FireAsync(...)
 function LibCustomEvent:FireAsync(...)
     return self:Fire(...)
+end
+
+--// DECONSTRUCTOR : function &lt;void> LibCustomEvent:Destroy()
+function LibCustomEvent:Destroy()
+    for _, ftable in next, self.__LCE_EVENTS do
+        if typeof(ftable) ~= "table" then continue end
+        ftable[2]:Disconnect()
+    end
+    rawset(self, "__LCE_EVENTS", {})
+    rawset(self, "__LCE_DESTROYED", true)
+    return
 end
 
 --// CLASS : LibCustomEventConnection : CONNECTION CLASS \\
