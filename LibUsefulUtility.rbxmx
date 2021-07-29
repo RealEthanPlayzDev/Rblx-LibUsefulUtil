@@ -24,6 +24,37 @@ return setmetatable(ct, {
     </Properties>
     <Item class="ModuleScript" referent="1">
       <Properties>
+        <string name="Name">LibBetterRequire</string>
+        <string name="Source">--[[
+File name: LibBetterRequire.lua
+Author: RadiatedExodus (RealEthanPlayz/RealEthanPlayzDev/ItzEthanPlayz_YT)
+Version: 1
+
+An better version of require that allows loading latest version of id modules.
+]]
+
+local serv = {
+    InsertService = game:GetService("InsertService");
+    RunService = game:GetService("RunService")
+}
+
+return function(assetId)
+    if typeof(assetId) == "number" or tonumber(assetId) then
+        if serv.RunService:IsServer() then
+            return require(serv.InsertService:LoadAssetVersion(serv.InsertService:GetLatestAssetVersionAsync(tonumber(assetId))):GetChildren()[1])
+        else
+            return error("require(assetId) cannot be called from a client. assetId = "..tostring(assetId), 2) 
+        end
+    elseif typeof(assetId) == "Instance" and assetId:IsA("ModuleScript") then
+        return require(assetId)
+    else
+        return error("Attempted to call require with invalid argument(s).", 2)
+    end
+end</string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="2">
+      <Properties>
         <string name="Name">LibCustomEvent</string>
         <string name="Source">--[[
 File name: LibCustomEvent.lua
@@ -154,7 +185,7 @@ end
 return LibCustomEventConstructor</string>
       </Properties>
     </Item>
-    <Item class="ModuleScript" referent="2">
+    <Item class="ModuleScript" referent="3">
       <Properties>
         <string name="Name">LibDeviceInfo</string>
         <string name="Source">--[[
@@ -385,7 +416,7 @@ LibDeviceInfo.graphicsQualityChanged = graphicsQualityChanged.Event
 return LibDeviceInfo</string>
       </Properties>
     </Item>
-    <Item class="ModuleScript" referent="3">
+    <Item class="ModuleScript" referent="4">
       <Properties>
         <string name="Name">LibDiscordEmbedCreator</string>
         <string name="Source">--[[
@@ -508,7 +539,7 @@ return {
 }</string>
       </Properties>
     </Item>
-    <Item class="ModuleScript" referent="4">
+    <Item class="ModuleScript" referent="5">
       <Properties>
         <string name="Name">LibDiscordWebhookSender</string>
         <string name="Source">--[[
@@ -604,7 +635,7 @@ return {
 }</string>
       </Properties>
     </Item>
-    <Item class="ModuleScript" referent="5">
+    <Item class="ModuleScript" referent="6">
       <Properties>
         <string name="Name">LibInstUtil</string>
         <string name="Source">--[[
