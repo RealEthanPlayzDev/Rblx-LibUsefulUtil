@@ -1,227 +1,278 @@
---// TODO proper rewrite
+--!strict
 --[[
 File name: DeviceInfo.lua
-Author: RadiatedExodus (RealEthanPlayz/RealEthanPlayzDev/ItzEthanPlayz_YT)
+Author: RadiatedExodus (ItzEthanPlayz_YT/RealEthanPlayzDev)
+Version: 2
+
+IMPORTANT NOTE: As of October 4 2021, I have noticed many ways that device detection or platform detection can be false, I no longer gurantee they 100% work and detect as expected.
+
 Reference links:
 - https://realethanplayzdev.github.io/Device%20Info/Device%20Info/
 - https://www.roblox.com/library/5343169924/Device-Info
 - https://devforum.roblox.com/t/device-info-LibDeviceInfo-to-detect-devices-platform-type-etc/716491
-NOTES:
-- This was originally an old LibDeviceInfo I made at July 2020, original links are posted on the reference links above.
-- The account I used to post the Roblox DevForum post of DeviceInfo was terminated from the DevForum due to a mistake I made, I hope I will never do something like that again...
-- The old API Reference on my page no longer matches this version (as I have rewritten this module), please do not use the API reference from there and wait until I remake my website.
-    --]]
-
-local LibDeviceInfo = {}
-assert(not game:GetService("RunService"):IsServer(), "[DeviceInfo]: DeviceInfo can only be used to the server.")
+--]]
 
 local serv = {
-    UserInputService = game:GetService("UserInputService");
-    GuiService = game:GetService("GuiService")
+	StarterGui = game:GetService("StarterGui");
+	UserInputService = game:GetService("UserInputService");
+	GuiService = game:GetService("GuiService");
+	RunService = game:GetService("RunService");
 }
 
-local previnput, prevres, prevorientation, prevquality
+assert(serv.RunService:IsServer(), "DeviceInfo only runs on the client, not the server")
 
-local inputChanged = Instance.new("BindableEvent")
-local resolutionChanged = Instance.new("BindableEvent")
-local orientationChanged = Instance.new("BindableEvent")
-local graphicsQualityChanged = Instance.new("BindableEvent")
+--// CLASS DeviceInfo
+local DeviceInfo = {}
 
---// Custom Enum creation
-LibDeviceInfo.Enum = setmetatable({
-	PlatformType = {
-		Computer = "PlatformType_Computer",
-		Console = "PlatformType_Console",
-		Mobile = "PlatformType_Mobile"
-	},
-	InputType = {
-		Touchscreen = "InputType_Touchscreen",
-		KeyboardMouse = "InputType_KeyboardMouse",
-		Gamepad = "InputType_Gamepad",
-		VR = "InputType_VR",
-		Keyboard = "InputType_Keyboard",
-		Mouse = "InputType_Mouse"
-	},
-	DeviceType = {
-		Computer = "DeviceType_Computer",
-		Phone = "DeviceType_Phone",
-		Tablet = "DeviceType_Tablet",
-		Console = "DeviceType_Console",
-		TouchscreenComputer = "DeviceType_TouchscreenComputer"
-	},
-	DeviceOrientation = {
-		Landscape = "DeviceOrientation_Landscape",
-		Portrait = "DeviceOrientation_Portrait"
-	}
-}, { __newindex = function() end; __metatable = "The metatable is locked"; })
-
---// function <Vector2> LibDeviceInfo.GetRobloxWindowResolution()
-function LibDeviceInfo.GetRobloxWindowResolution()
-	prevres = Vector2.new(game.Workspace.CurrentCamera.ViewportSize.X, game.Workspace.CurrentCamera.ViewportSize.Y)
-	return prevres
-end
-
---// function <PlatformType> LibDeviceInfo.GetDevicePlatform()
-function LibDeviceInfo.GetDevicePlatform()
-	if serv.GuiService:IsTenFootInterface() and serv.UserInputService.GamepadEnabled and not serv.UserInputService.KeyboardEnabled and not serv.UserInputService.MouseEnabled then
-		return LibDeviceInfo.Enum.PlatformType.Console
-	elseif serv.UserInputService.TouchEnabled and not serv.UserInputService.KeyboardEnabled and not serv.UserInputService.MouseEnabled then
-		return LibDeviceInfo.Enum.PlatformType.Mobile
-	else
-		return LibDeviceInfo.Enum.PlatformType.Computer
-	end
-end
-
---// function <InputType> LibDeviceInfo.GetDeviceInput()
-function LibDeviceInfo.GetDeviceInput()
-    --// KeyboardMouse
-	if serv.UserInputService.KeyboardEnabled and serv.UserInputService.MouseEnabled and not serv.UserInputService.GamepadEnabled and not serv.UserInputService.TouchEnabled then
-		previnput = LibDeviceInfo.Enum.InputType.KeyboardMouse
-		return LibDeviceInfo.Enum.InputType.KeyboardMouse
+--// Luau custom types
+export type DeviceInfo = {
+	--// enums
+	--// DeviceInfoEnum.PlatformType DeviceInfo.PlatformType
+	PlatformType: {
+		Computer: string;
+		Console: string;
+		Mobile: string;
+	};
 	
-    --// Keyboard
-	elseif serv.UserInputService.KeyboardEnabled and not serv.UserInputService.MouseEnabled and not serv.UserInputService.GamepadEnabled and not serv.UserInputService.TouchEnabled then
-		previnput = LibDeviceInfo.Enum.InputType.Keyboard
-		return LibDeviceInfo.Enum.InputType.Keyboard
-		
-    --// Mouse
-	elseif not serv.UserInputService.KeyboardEnabled and serv.UserInputService.MouseEnabled and not serv.UserInputService.GamepadEnabled and not serv.UserInputService.TouchEnabled then
-		previnput = LibDeviceInfo.Enum.InputType.Mouse
-		return LibDeviceInfo.Enum.InputType.Mouse
-		
-    --// Gamepad
-	elseif not serv.UserInputService.KeyboardEnabled and not serv.UserInputService.MouseEnabled and serv.UserInputService.GamepadEnabled and not serv.UserInputService.TouchEnabled then
-		previnput = LibDeviceInfo.Enum.InputType.Gamepad
-		return LibDeviceInfo.Enum.InputType.Gamepad
-		
-    --// VR
+	--// DeviceInfoEnum.InputType DeviceInfo.InputType
+	InputType: {
+		Touchscreen: string;
+		KeyboardMouse: string;
+		Gamepad: string;
+		VR: string;
+		Keyboard: string;
+		Mouse: string;
+	};
+	
+	--// DeviceInfoEnum.DeviceType DeviceInfo.DeviceType
+	DeviceType: {
+		Computer: string;
+		Phone: string;
+		Tablet: string;
+		Console: string;
+		TouchscreenComputer: string;
+	};
+	
+	--// DeviceInfoEnum.DeviceOrientation DeviceInfo.DeviceOrientation
+	DeviceOrientation: {
+		Landscape: string;
+		Portrait: string;
+	};
+
+	--// functions
+	--// function DeviceInfo.GetDevicePlatform(): DeviceInfoEnum.PlatformType
+	GetDevicePlatform: any;
+
+	--// function DeviceInfo.GetDeviceOrientation(): DeviceInfoEnum.DeviceOrientation
+	GetDeviceOrientation: any;
+
+	--// function DeviceInfo.GetWindowResolution(): Vector2
+	GetWindowResolution: any;
+
+	--// function DeviceInfo.GetDeviceInput(): DeviceInfoEnum.InputType
+	GetDeviceInput: any;
+
+	--// function DeviceInfo.GetDeviceType(): DeviceInfoEnum.DeviceType
+	GetDeviceType: any;
+
+	--// function DeviceInfo.GetGraphicsQuality(): Enum.SavedQualitySetting
+	GetGraphicsQuality: any;
+
+	--// Bindables
+	--// RBXScriptSignal DeviceInfo.InputChanged: DeviceInfoEnum.InputType
+	InputChanged: RBXScriptSignal;
+
+	--// RBXScriptSignal DeviceInfo.WindowResolutionChanged: Vector2
+	WindowResolutionChanged: RBXScriptSignal;
+
+	--// RBXScriptSignal DeviceInfo.OrientationChanged: DeviceInfoEnum.DeviceOrientation
+	OrientationChanged: RBXScriptSignal;
+
+	--// RBXScriptSignal DeviceInfo.GraphicsQualityChanged: Enum.SavedQualitySetting
+	GraphicsQualityChanged: RBXScriptSignal;
+}
+
+--//local lockedMeta = {__newindex = function() return error("attempt to modify readonly table", 2) end; __metatable = "This metatable is locked."}
+--// DeviceInfoEnum.PlatformType DeviceInfo.PlatformType
+DeviceInfo.PlatformType = {
+	Computer = "DeviceInfo_PlatformType_Computer";
+	Console = "DeviceInfo_PlatformType_Console";
+	Mobile = "DeviceInfo_PlatformType_Mobile";
+}
+
+--// DeviceInfoEnum.InputType DeviceInfo.InputType
+DeviceInfo.InputType = {
+	Touchscreen = "DeviceInfo_InputType_Touchscreen";
+	KeyboardMouse = "DeviceInfo_InputType_KeyboardMouse";
+	Gamepad = "DeviceInfo_InputType_Gamepad";
+	VR = "DeviceInfo_InputType_VR";
+	Keyboard = "DeviceInfo_InputType_Keyboard";
+	Mouse = "DeviceInfo_InputType_Mouse";
+}
+
+--// DeviceInfoEnum.DeviceType DeviceInfo.DeviceType
+DeviceInfo.DeviceType = {
+	Computer = "DeviceInfo_DeviceType_Computer";
+	Phone = "DeviceInfo_DeviceType_Phone";
+	Tablet = "DeviceInfo_DeviceType_Tablet";
+	Console = "DeviceInfo_DeviceType_Console";
+	TouchscreenComputer = "DeviceType_TouchscreenComputer";
+}
+
+--// DeviceInfoEnum.DeviceOrientation DeviceInfo.DeviceOrientation
+DeviceInfo.DeviceOrientation = {
+	Landscape = "DeviceInfo_DeviceOrientation_Landscape";
+	Portrait = "DeviceInfo_DeviceOrientation_Portrait";
+}
+
+local previousRes: Vector2, previousInput: string, previousOrientation: string, previousGraphicsQuality: Enum.SavedQualitySetting, oldCamConnection: RBXScriptConnection
+local userGameSettings = UserSettings():GetService("UserGameSettings")
+
+--// Bindables to be exposed to scripts
+local inputChangeBind = Instance.new("BindableEvent")
+local resChangeBind = Instance.new("BindableEvent")
+local orientationChangeBind = Instance.new("BindableEvent")
+local graphicsQualityChangeBind = Instance.new("BindableEvent")
+
+--// function DeviceInfo.GetDevicePlatform(): DeviceInfoEnum.PlatformType
+function DeviceInfo.GetDevicePlatform(): string
+	if serv.GuiService:IsTenFootInterface() and serv.UserInputService.GamepadEnabled then
+		return DeviceInfo.PlatformType.Console
+	elseif serv.UserInputService.TouchEnabled and not serv.UserInputService.KeyboardEnabled and not serv.UserInputService.MouseEnabled then
+		return DeviceInfo.PlatformType.Mobile
+	else
+		return DeviceInfo.PlatformType.Computer
+	end
+end
+
+--// function DeviceInfo.GetDeviceOrientation(): DeviceInfoEnum.DeviceOrientation
+function DeviceInfo.GetDeviceOrientation(): string
+	if (workspace.CurrentCamera.ViewportSize.X < workspace.CurrentCamera.ViewportSize.Y) then
+		previousOrientation = DeviceInfo.DeviceOrientation.Portrait
+		return DeviceInfo.DeviceOrientation.Portrait
+	else
+		previousOrientation = DeviceInfo.DeviceOrientation.Landscape
+		return DeviceInfo.DeviceOrientation.Landscape
+	end
+end
+
+--// function DeviceInfo.GetWindowResolution(): Vector2
+function DeviceInfo.GetWindowResolution(): Vector2
+	previousRes = workspace.CurrentCamera.ViewportSize
+	return previousRes
+end
+
+--// function DeviceInfo.GetDeviceInput(): DeviceInfoEnum.InputType
+function DeviceInfo.GetDeviceInput(): string
+	if serv.UserInputService.MouseEnabled and serv.UserInputService.KeyboardEnabled then
+		previousInput = DeviceInfo.InputType.KeyboardMouse
+		return DeviceInfo.InputType.KeyboardMouse
+	elseif serv.UserInputService.MouseEnabled and not serv.UserInputService.KeyboardEnabled then
+		previousInput = DeviceInfo.InputType.Mouse
+		return DeviceInfo.InputType.Mouse
+	elseif serv.UserInputService.KeyboardEnabled and not serv.UserInputService.MouseEnabled then
+		previousInput = DeviceInfo.InputType.Keyboard
+		return DeviceInfo.InputType.Keyboard
+	elseif serv.UserInputService.GamepadEnabled then
+		previousInput = DeviceInfo.InputType.Gamepad
+		return DeviceInfo.InputType.Gamepad
 	elseif serv.UserInputService.VREnabled then
-		previnput = LibDeviceInfo.Enum.InputType.VR
-		return LibDeviceInfo.Enum.InputType.VR
-		
-    --// Touchscreen
+		previousInput = DeviceInfo.InputType.VR
+		return DeviceInfo.InputType.VR
 	else
-		previnput = LibDeviceInfo.Enum.InputType.Touchscreen
-		return LibDeviceInfo.Enum.InputType.Touchscreen
+		previousInput = DeviceInfo.InputType.Touchscreen
+		return DeviceInfo.InputType.Touchscreen
 	end
 end
 
---// function <DeviceOrientation> LibDeviceInfo.GetDeviceOrientation()
-function LibDeviceInfo.GetDeviceOrientation()
-	if LibDeviceInfo.GetDevicePlatform() ~= LibDeviceInfo.Enum.PlatformType.Mobile then return end
-	local isPortrait = game.Workspace.Camera.ViewportSize.X < game.Workspace.Camera.ViewportSize.Y
-	if isPortrait then
-		return LibDeviceInfo.Enum.DeviceOrientation.Portrait
-	else
-		return LibDeviceInfo.Enum.DeviceOrientation.Landscape
-	end
-end
-
---// function <DeviceType> LibDeviceInfo.GetDeviceType()
-function LibDeviceInfo.GetDeviceType()
-    --// Console
-	if serv.GuiService:IsTenFootInterface() and serv.UserInputService.GamepadEnabled and not serv.UserInputService.KeyboardEnabled and not serv.UserInputService.MouseEnabled then
-		return LibDeviceInfo.Enum.DeviceType.Console
-		
-    --// Tablet/Phone
-	elseif not serv.GuiService:IsTenFootInterface() and serv.UserInputService.TouchEnabled and not serv.UserInputService.KeyboardEnabled and not serv.UserInputService.MouseEnabled then
-		local deviceOrientation = LibDeviceInfo.GetDeviceOrientation()
-		if deviceOrientation == LibDeviceInfo.Enum.DeviceOrientation.Landscape then
-			
+--// function DeviceInfo.GetDeviceType(): DeviceInfoEnum.DeviceType
+function DeviceInfo.GetDeviceType(): string
+	if serv.GuiService:IsTenFootInterface() and serv.UserInputService.GamepadEnabled then
+		return DeviceInfo.DeviceType.Console
+	elseif DeviceInfo.GetDevicePlatform() == DeviceInfo.PlatformType.Mobile and serv.UserInputService.TouchEnabled then
+		local orientation = DeviceInfo.GetDeviceOrientation()
+		if orientation == DeviceInfo.DeviceOrientation.Landscape then
 			if workspace.CurrentCamera.ViewportSize.Y < 600 then
-				return LibDeviceInfo.Enum.DeviceType.Phone
+				return DeviceInfo.DeviceType.Phone
             end
-			return LibDeviceInfo.Enum.DeviceType.Tablet
-		elseif deviceOrientation ==  LibDeviceInfo.Enum.DeviceOrientation.Portrait then
+			return DeviceInfo.DeviceType.Tablet
+		else
 			if workspace.CurrentCamera.ViewportSize.X < 600 then
-				return LibDeviceInfo.Enum.DeviceType.Phone
+				return DeviceInfo.DeviceType.Phone
             end
-			return LibDeviceInfo.Enum.DeviceType.Tablet
+			return DeviceInfo.DeviceType.Tablet
 		end
-		
-    --// TouchscreenComputer
 	elseif serv.UserInputService.TouchEnabled and serv.UserInputService.KeyboardEnabled and serv.UserInputService.MouseEnabled then
-		return LibDeviceInfo.Enum.DeviceType.TouchscreenComputer
-		
-    --// Computer
+		return DeviceInfo.DeviceType.TouchscreenComputer
 	else
-		return LibDeviceInfo.Enum.DeviceType.Computer
+		return DeviceInfo.DeviceType.Computer
 	end
 end
 
---// function <QualityLevel> LibDeviceInfo.GetGraphicsQuality()
-function LibDeviceInfo.GetGraphicsQuality()
-	return UserSettings().GameSettings.SavedQualityLevel
+--// function DeviceInfo.GetGraphicsQuality(): Enum.SavedQualitySetting
+function DeviceInfo.GetGraphicsQuality(): Enum.SavedQualitySetting
+	return userGameSettings.SavedQualityLevel
 end
 
+--// Input change detection
 serv.UserInputService.LastInputTypeChanged:Connect(function()
-	--// KeyboardMouse
-	if serv.UserInputService.KeyboardEnabled and serv.UserInputService.MouseEnabled and not serv.UserInputService.GamepadEnabled and not serv.UserInputService.TouchEnabled then
-		if previnput == LibDeviceInfo.Enum.InputType.KeyboardMouse then return end
-		inputChanged:Fire(LibDeviceInfo.Enum.InputType.KeyboardMouse)
-		
-    --// Keyboard
-	elseif serv.UserInputService.KeyboardEnabled and not serv.UserInputService.MouseEnabled and not serv.UserInputService.GamepadEnabled and not serv.UserInputService.TouchEnabled then
-		if previnput == LibDeviceInfo.Enum.InputType.Keyboard then return end
-		inputChanged:Fire(LibDeviceInfo.Enum.InputType.Keyboard)
-		
-    --// Mouse
-	elseif not serv.UserInputService.KeyboardEnabled and serv.UserInputService.MouseEnabled and not serv.UserInputService.GamepadEnabled and not serv.UserInputService.TouchEnabled then
-		if previnput == LibDeviceInfo.Enum.InputType.Mouse then return end
-		inputChanged:Fire(LibDeviceInfo.Enum.InputType.Mouse)
-		
-    --// Gamepad
-	elseif not serv.UserInputService.KeyboardEnabled and not serv.UserInputService.MouseEnabled and serv.UserInputService.GamepadEnabled and not serv.UserInputService.TouchEnabled then
-		if previnput == LibDeviceInfo.Enum.InputType.Gamepad then return end
-		inputChanged:Fire(LibDeviceInfo.Enum.InputType.Gamepad)
-		
-    --// VR
-	elseif serv.UserInputService.VREnabled then
-		if previnput == LibDeviceInfo.Enum.InputType.VR then return end
-		inputChanged:Fire(LibDeviceInfo.Enum.InputType.VR)
+	local oldPrevInput = previousInput
+	DeviceInfo.GetDeviceInput()
+	if previousInput == oldPrevInput then return end
+	inputChangeBind:Fire(previousInput)
+	return
+end)
 
-	--// Touchscreen
-	else
-		if previnput == LibDeviceInfo.Enum.InputType.Touchscreen then return end
-		inputChanged:Fire(LibDeviceInfo.Enum.InputType.Touchscreen)
+--// Orienation and window size change detection
+local function CameraHook()
+	if oldCamConnection then
+		oldCamConnection:Disconnect()
+		oldCamConnection = nil
 	end
+
+	oldCamConnection = workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+		--// Window size
+		local oldPrevRes = previousRes
+		DeviceInfo.GetWindowResolution()
+		if previousRes ~= oldPrevRes then
+			resChangeBind:Fire(previousRes)
+		end
+
+		--// Orientation
+		local oldPrevOrientation = previousOrientation
+		DeviceInfo.GetDeviceOrientation()
+		if previousOrientation ~= oldPrevOrientation then
+			orientationChangeBind:Fire(previousOrientation)
+		end
+
+		return
+	end)
+end
+
+CameraHook()
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(CameraHook)
+
+--// Graphics quality level change
+userGameSettings:GetPropertyChangedSignal("SavedQualityLevel"):Connect(function()
+	local oldPrevGraphicsQuality = previousOrientation
+	DeviceInfo.GetGraphicsQuality()
+	if previousGraphicsQuality ~= oldPrevGraphicsQuality then
+		graphicsQualityChangeBind:Fire(previousGraphicsQuality)
+	end
+	return
 end)
 
-local oldcamsignal = nil
+--// Expose bindables to script
+--// RBXScriptSignal DeviceInfo.InputChanged: DeviceInfoEnum.InputType
+DeviceInfo.InputChanged = inputChangeBind.Event
 
-workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
-    if oldcamsignal then
-        oldcamsignal:Disconnect()
-        oldcamsignal = nil 
-    end
-    oldcamsignal = workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-        --// Size changed
-        if game.Workspace.CurrentCamera.ViewportSize.X ~= prevres.X and game.Workspace.CurrentCamera.ViewportSize.X ~= prevres.Y then
-            prevres = Vector2.new(game.Workspace.CurrentCamera.ViewportSize.X, game.Workspace.CurrentCamera.ViewportSize.Y)
-            resolutionChanged:Fire(Vector2.new(game.Workspace.CurrentCamera.ViewportSize.X, game.Workspace.CurrentCamera.ViewportSize.Y))
-        end
-        
-        --// Orientation changed
-        local newOrientation = LibDeviceInfo.GetDeviceOrientation()
-        if newOrientation ~= prevorientation then
-            if newOrientation == LibDeviceInfo.Enum.DeviceOrientation.Portrait then
-                orientationChanged:Fire(LibDeviceInfo.Enum.DeviceOrientation.Portrait) 
-            elseif newOrientation == LibDeviceInfo.Enum.DeviceOrientation.Landscape then
-                orientationChanged:Fire(LibDeviceInfo.Enum.DeviceOrientation.Landscape) 
-            end
-        end
-    end)
-end)
+--// RBXScriptSignal DeviceInfo.WindowResolutionChanged: Vector2
+DeviceInfo.WindowResolutionChanged = resChangeBind.Event
 
-UserSettings().GameSettings.Changed:Connect(function()
-	local quality = LibDeviceInfo.GetGraphicsQuality()
-	if quality == prevquality then return end
-    graphicsQualityChanged:Fire(quality)
-end)
+--// RBXScriptSignal DeviceInfo.OrientationChanged: DeviceInfoEnum.DeviceOrientation
+DeviceInfo.OrientationChanged = orientationChangeBind.Event
 
-LibDeviceInfo.inputTypeChanged = inputChanged.Event
-LibDeviceInfo.screenSizeChanged = resolutionChanged.Event
-LibDeviceInfo.screenOrientationChanged = orientationChanged.Event
-LibDeviceInfo.graphicsQualityChanged = graphicsQualityChanged.Event
+--// RBXScriptSignal DeviceInfo.GraphicsQualityChanged: Enum.SavedQualitySetting
+DeviceInfo.GraphicsQualityChanged = graphicsQualityChangeBind.Event
 
-return LibDeviceInfo
+return DeviceInfo
