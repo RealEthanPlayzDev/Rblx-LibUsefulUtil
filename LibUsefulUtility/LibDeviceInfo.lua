@@ -66,8 +66,8 @@ export type DeviceInfo = {
 	--// function DeviceInfo.GetDeviceOrientation(): DeviceInfoEnum.DeviceOrientation
 	GetDeviceOrientation: any;
 
-	--// function DeviceInfo.GetWindowResolution(): Vector2
-	GetWindowResolution: any;
+	--// function DeviceInfo.GetWindowSize(): Vector2
+	GetWindowSize: any;
 
 	--// function DeviceInfo.GetDeviceInput(): DeviceInfoEnum.InputType
 	GetDeviceInput: any;
@@ -156,8 +156,8 @@ function DeviceInfo.GetDeviceOrientation(): string
 	end
 end
 
---// function DeviceInfo.GetWindowResolution(): Vector2
-function DeviceInfo.GetWindowResolution(): Vector2
+--// function DeviceInfo.GetWindowSize(): Vector2
+function DeviceInfo.GetWindowSize(): Vector2
 	previousRes = workspace.CurrentCamera.ViewportSize
 	return previousRes
 end
