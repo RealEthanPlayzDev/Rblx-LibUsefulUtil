@@ -1,3 +1,4 @@
+--// TODO proper rewrite
 --[[
 File name: DeviceInfo.lua
 Author: RadiatedExodus (RealEthanPlayz/RealEthanPlayzDev/ItzEthanPlayz_YT)
