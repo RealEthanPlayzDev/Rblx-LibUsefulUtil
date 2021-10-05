@@ -24,7 +24,8 @@ assert(serv.RunService:IsServer(), "DeviceInfo only runs on the client, not the 
 --// CLASS DeviceInfo
 local DeviceInfo = {}
 
---// Luau custom types
+--[[// Luau custom types - use for types
+--// TODO use function type when available
 export type DeviceInfo = {
 	--// enums
 	--// DeviceInfoEnum.PlatformType DeviceInfo.PlatformType
@@ -83,7 +84,7 @@ export type DeviceInfo = {
 	InputChanged: RBXScriptSignal;
 
 	--// RBXScriptSignal DeviceInfo.WindowResolutionChanged: Vector2
-	WindowResolutionChanged: RBXScriptSignal;
+	WindowSizeChanged: RBXScriptSignal;
 
 	--// RBXScriptSignal DeviceInfo.OrientationChanged: DeviceInfoEnum.DeviceOrientation
 	OrientationChanged: RBXScriptSignal;
@@ -91,6 +92,7 @@ export type DeviceInfo = {
 	--// RBXScriptSignal DeviceInfo.GraphicsQualityChanged: Enum.SavedQualitySetting
 	GraphicsQualityChanged: RBXScriptSignal;
 }
+--]]
 
 --//local lockedMeta = {__newindex = function() return error("attempt to modify readonly table", 2) end; __metatable = "This metatable is locked."}
 --// DeviceInfoEnum.PlatformType DeviceInfo.PlatformType
@@ -267,7 +269,7 @@ end)
 DeviceInfo.InputChanged = inputChangeBind.Event
 
 --// RBXScriptSignal DeviceInfo.WindowResolutionChanged: Vector2
-DeviceInfo.WindowResolutionChanged = resChangeBind.Event
+DeviceInfo.WindowSizeChanged = resChangeBind.Event
 
 --// RBXScriptSignal DeviceInfo.OrientationChanged: DeviceInfoEnum.DeviceOrientation
 DeviceInfo.OrientationChanged = orientationChangeBind.Event
