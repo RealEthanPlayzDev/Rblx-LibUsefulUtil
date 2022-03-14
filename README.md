@@ -1,3 +1,6 @@
+# NO LONGER MAINTAINED
+I no longer want to continue to maintain this. The project is pretty much dead and and I can't get ideas that I can implement here. You are free to fork it if you would like and work from your fork if you need to make changes.
+
 # LibUsefulUtil
 LibUsefulUtil is a pack of libraries designed to be expandable and easy to use in the Roblox development environment, it utilizes Rojo aswell.
 Currently theres still a small amount of libraries, however I will try to write more when I have more ideas.
